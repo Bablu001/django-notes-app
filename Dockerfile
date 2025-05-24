@@ -1,18 +1,23 @@
-# Use official Python base image
 FROM python:3.9
 
-# Set working directory inside the container
-WORKDIR /app
+# Set working directory
+WORKDIR /app/backend
 
-# Copy requirements and install dependencies
+# Copy requirements first to use Docker cache efficiently
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy rest of the application code
+# Install OS-level dependencies & Python packages
+RUN apt-get update && \
+    apt-get install -y gcc default-libmysqlclient-dev pkg-config && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the rest of the app
 COPY . .
 
-# Expose the port Django runs on
+# Expose port for Django runserver
 EXPOSE 8000
 
-# Run Django development server
+# Default command to run the Django app
 CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
