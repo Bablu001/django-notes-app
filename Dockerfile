@@ -1,20 +1,18 @@
+# Use official Python base image
 FROM python:3.9
 
-WORKDIR /app/backend
+# Set working directory inside the container
+WORKDIR /app
 
-COPY requirements.txt /app/backend
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
-    && rm -rf /var/lib/apt/lists/*
-
-
-# Install app dependencies
-RUN pip install mysqlclient
+# Copy requirements and install dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/backend
+# Copy rest of the application code
+COPY . .
 
+# Expose the port Django runs on
 EXPOSE 8000
-#RUN python manage.py migrate
-#RUN python manage.py makemigrations
+
+# Run Django development server
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
